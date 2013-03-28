@@ -163,7 +163,6 @@ def run():
             sleep(15)
         
 if __name__ == "__main__":
-    while(1):
         get_record_id()
         update_record()
         run()
