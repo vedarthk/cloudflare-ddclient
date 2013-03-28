@@ -3,7 +3,7 @@ cloudflare-ddclient
 
 Dynamic DNS client for CloudFlare domain names. This script runs as daemon and updates dynamic IP (ever changing IP address) to CloudFalre's DNS records. You will need a CloudFlare account to use this script.
 
-Update `ddclient.py` with your Email address and API key :
+Update `ddclient.py` with your Email address and [API](https://www.cloudflare.com/my-account "API Key") key :
 
 
     CF_EMAIL = 'email@example.com'
