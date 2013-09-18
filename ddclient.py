@@ -8,6 +8,7 @@ import os
 from time import sleep
 import daemon
 import logging as log
+import json
 log.basicConfig(filename='ddclient-cloudflare.log', format = '%(asctime)s %(levelname)s %(message)s', datefmt = '%Y-%m-%d %H:%M:%S', level = log.DEBUG)
 
 try:
@@ -33,15 +34,29 @@ except Exception, e:
     print "Usage : ddclient.py start|stop [domain subdomain]"
     exit()
 
-CF_EMAIL = 'email@example.com'
-CF_API_KEY = 'yourapikey'
+try:
+    settings = open("settings.json", "r")
+    settings_obj = json.load(settings)
+except Exception, e:
+    raise
+    print "Error : settings.json file not found"
+    exit()
+
+###############################
+# Defined in settings.json
+# CF_EMAIL = 'email@example.com'
+# CF_API_KEY = 'yourapikey'
+##############################
+
+CF_EMAIL = settings_obj['CF_EMAIL']
+CF_API_KEY = settings_obj['CF_API_KEY']
 CF_DOMAIN = sys.argv[2]
 CF_SUB_DOMAIN = sys.argv[3]
 CF_URL = 'https://www.cloudflare.com/api_json.html'
 
 def get_ip():
     try:
-        response = urllib2.urlopen('http://curlmyip.com')
+        response = urllib2.urlopen('http://ifconfig.me/ip')
         ipaddr = response.readline().strip("\n")
         response.close()
         return ipaddr
@@ -146,6 +161,7 @@ def update_record():
         if response['result'] == "success":
             file = open('/tmp/ddclient.py.ipaddr','w')
             file.write(my_ip)
+            log.debug("IP Updated" + str(ip))
             file.close()
         else:
             log.debug("Error : Was unable to update." + "Cause : %s" % (response['msg']))
