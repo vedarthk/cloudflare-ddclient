@@ -7,6 +7,8 @@ import sys
 import os
 from time import sleep
 import daemon
+import logging as log
+log.basicConfig(filename='ddclient-cloudflare.log', format = '%(asctime)s %(levelname)s %(message)s', datefmt = '%Y-%m-%d %H:%M:%S', level = log.DEBUG)
 
 try:
     if sys.argv[1]:
@@ -19,6 +21,7 @@ try:
                 pid = pid_file.read(100)
                 pid_file.close()
                 print "Killing process %s" % (pid)
+                log.debug("Killing process %s" % (pid))
                 os.system("kill %s" % (pid))
             except:
                 pass
@@ -43,8 +46,9 @@ def get_ip():
         response.close()
         return ipaddr
     except:
+        log.debug("Error: Cannot resolve IP address!")
         print "Error : Cannot resolve IP address!"
-        exit()
+        pass
 
 
 def get_record_id():
@@ -67,8 +71,9 @@ def get_record_id():
         response_text = response.readline()
         response.close()
     except:
+        log.debug("Eror : Cannot open socket!")
         print "Error : Cannot open socket!"
-        exit()
+        pass
 
     response = json.loads(response_text)
     
@@ -89,8 +94,9 @@ def get_record_id():
             print "Error : I/O error, cannot open files!"
             exit()
     else:
+        log.debug("Error : Unable to find sub domain or domain!")
         print "Error : Unable to find sub domain or domain!"
-        exit()
+        pass
 
 def update_record():
     flag_found_name = False
@@ -100,8 +106,9 @@ def update_record():
         flag_found_name = True
         file.close()
     except:
+        log.debug("Error : Cannot fecth record id!")
         print "Error : Cannot fecth record id!"
-        exit()
+        pass
 
     if flag_found_name:
         my_ip = get_ip()
@@ -141,13 +148,15 @@ def update_record():
             file.write(my_ip)
             file.close()
         else:
+            log.debug("Error : Was unable to update." + "Cause : %s" % (response['msg']))
             print "Error : Was unable to update."
             print "Cause : %s" % (response['msg'])
-            exit()
+            pass
     
     else:
+        log.debug("Error : Unable to find provided sub domain.")
         print "Error : Unable to find provided sub domain."
-        exit()
+        pass
 
 def write_pid(pid):
     pid_file = open('/tmp/ddclient.py.pid', 'w')
