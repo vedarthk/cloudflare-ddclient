@@ -38,7 +38,6 @@ try:
     settings = open("settings.json", "r")
     settings_obj = json.load(settings)
 except Exception, e:
-    raise
     print "Error : settings.json file not found"
     exit()
 
