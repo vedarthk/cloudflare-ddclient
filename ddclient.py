@@ -118,66 +118,71 @@ def get_record_id():
         print "Error : Unable to find sub domain or domain!"
         pass
 
+
 def update_record():
     flag_found_name = False
     try:
-        file = open("/tmp/ddclient.py.recid_%s_%s" % (CF_DOMAIN, CF_SUB_DOMAIN), 'r')
-        rec_id = file.read(100000)
-        flag_found_name = True
-        file.close()
+        filepath = "/tmp/ddclient.recid_{}_{}".format(CF_DOMAIN, CF_SUB_DOMAIN)
+        with open(filepath, 'r') as f:
+            rec_id = f.read()
+            flag_found_name = True
     except:
         log.debug("Error : Cannot fecth record id!")
         print "Error : Cannot fecth record id!"
-        pass
+        sys.exit(1)
 
     if flag_found_name:
         my_ip = get_ip()
 
         try:
-            file = open('/tmp/ddclient.py.ipaddr', 'r')
-            ip = file.read(20)
-            file.close()
+            with open('/tmp/ddclient.py.ipaddr', 'r') as f:
+                ip = f.read().strip()
             if my_ip == ip:
-                time.sleep(15)
                 return
         except:
             pass
 
         try:
-            response = urllib2.urlopen(urllib2.Request(CF_URL, urllib.urlencode({
-                'a' : 'rec_edit',
-                'tkn' : CF_API_KEY,
-                'email' : CF_EMAIL,
-                'z' : CF_DOMAIN,
-                'type' : 'A',
-                'name' : CF_SUB_DOMAIN,
-                'id' : rec_id,
-                'content' : my_ip,
-                'service_mode' : '0',
-                'ttl' : '1',
-            })))
+            request = urllib2.Request(CF_URL, urllib.urlencode({
+                'a': 'rec_edit',
+                'tkn': CF_API_KEY,
+                'email': CF_EMAIL,
+                'z': CF_DOMAIN,
+                'type': 'A',
+                'name': CF_SUB_DOMAIN,
+                'id': rec_id,
+                'content': my_ip,
+                'service_mode': '0',
+                'ttl': '1',
+            }))
+            response = urllib2.urlopen(request)
             response_text = response.readline()
             response.close()
         except:
             print "Error : Cannot open socket!"
-            exit()
-        
+            sys.exit(1)
+
         response = json.loads(response_text)
         if response['result'] == "success":
-            file = open('/tmp/ddclient.py.ipaddr','w')
+            file = open('/tmp/ddclient.py.ipaddr', 'w')
             file.write(my_ip)
             log.debug("IP Updated" + str(ip))
             file.close()
         else:
-            log.debug("Error : Was unable to update." + "Cause : %s" % (response['msg']))
+            log.debug(
+                "Error : Was unable to update. Cause : {}".format(
+                    response['msg']
+                )
+            )
             print "Error : Was unable to update."
             print "Cause : %s" % (response['msg'])
-            pass
-    
+            sys.exit(1)
+
     else:
         log.debug("Error : Unable to find provided sub domain.")
         print "Error : Unable to find provided sub domain."
-        pass
+        sys.exit(1)
+
 
 def write_pid(pid):
     pid_file = open('/tmp/ddclient.py.pid', 'w')
@@ -185,13 +190,14 @@ def write_pid(pid):
     pid_file.close()
     return
 
+
 def run():
     with daemon.DaemonContext():
         write_pid(os.getpid())
         while(1):
             update_record()
-            sleep(15)
-        
+            time.sleep(15)
+
 if __name__ == "__main__":
         get_record_id()
         update_record()
