@@ -58,6 +58,7 @@ CF_DOMAIN = sys.argv[2]
 CF_SUB_DOMAIN = sys.argv[3]
 CF_URL = 'https://www.cloudflare.com/api_json.html'
 
+
 def get_ip():
     try:
         response = urllib2.urlopen('http://ifconfig.me/ip')
@@ -72,19 +73,19 @@ def get_ip():
 
 def get_record_id():
     try:
-        file = open("/tmp/ddclient.py.recid_%s_%s" % (CF_DOMAIN, CF_SUB_DOMAIN), 'r')
-        rec_id = file.read(100000)
-        file.close()
-        return rec_id
+        filepath = "/tmp/ddclient.recid_{}_{}".format(CF_DOMAIN, CF_SUB_DOMAIN)
+        with open(filepath, 'r') as f:
+            rec_id = f.read()
+            return rec_id.strip()
     except:
         pass
 
     try:
         response = urllib2.urlopen(urllib2.Request(CF_URL, urllib.urlencode({
-            'a' : 'rec_load_all',
-            'tkn' : CF_API_KEY,
-            'email' : CF_EMAIL,
-            'z' : CF_DOMAIN,
+            'a': 'rec_load_all',
+            'tkn': CF_API_KEY,
+            'email': CF_EMAIL,
+            'z': CF_DOMAIN,
         })))
 
         response_text = response.readline()
@@ -92,26 +93,26 @@ def get_record_id():
     except:
         log.debug("Eror : Cannot open socket!")
         print "Error : Cannot open socket!"
-        pass
+        sys.exit(1)
 
     response = json.loads(response_text)
-    
+
     flag_found_name = False
-    
     for record in response['response']['recs']['objs']:
         if record['display_name'] == CF_SUB_DOMAIN:
             flag_found_name = True
             rec_id = record['rec_id']
-    
+
     if flag_found_name:
         try:
-            file = open("/tmp/ddclient.py.recid_%s_%s" % (CF_DOMAIN, CF_SUB_DOMAIN), 'w')
-            file.write(rec_id)
-            file.close()
+            filepath = "/tmp/ddclient.recid_{}_{}".format(
+                CF_DOMAIN, CF_SUB_DOMAIN)
+            with open(filepath, 'w') as f:
+                f.write(rec_id)
             return rec_id
         except:
             print "Error : I/O error, cannot open files!"
-            exit()
+            sys.exit(1)
     else:
         log.debug("Error : Unable to find sub domain or domain!")
         print "Error : Unable to find sub domain or domain!"
