@@ -1,15 +1,20 @@
 #!/usr/bin/python
 
+import os
+import sys
+import json
+import time
+import daemon
 import urllib
 import urllib2
-import json
-import sys
-import os
-from time import sleep
-import daemon
 import logging as log
 
-log.basicConfig(filename='ddclient-cloudflare.log', format = '%(asctime)s %(levelname)s %(message)s', datefmt = '%Y-%m-%d %H:%M:%S', level = log.DEBUG)
+log.basicConfig(
+    filename='ddclient-cloudflare.log',
+    format='%(asctime)s %(levelname)s %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S',
+    level=log.DEBUG
+)
 
 try:
     if sys.argv[1]:
@@ -132,7 +137,7 @@ def update_record():
             ip = file.read(20)
             file.close()
             if my_ip == ip:
-                sleep(15)
+                time.sleep(15)
                 return
         except:
             pass
