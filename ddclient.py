@@ -8,7 +8,7 @@ import os
 from time import sleep
 import daemon
 import logging as log
-import json
+
 log.basicConfig(filename='ddclient-cloudflare.log', format = '%(asctime)s %(levelname)s %(message)s', datefmt = '%Y-%m-%d %H:%M:%S', level = log.DEBUG)
 
 try:
