@@ -57,6 +57,9 @@ CF_API_KEY = settings_obj['CF_API_KEY']
 CF_DOMAIN = sys.argv[2]
 CF_SUB_DOMAIN = sys.argv[3]
 CF_URL = 'https://www.cloudflare.com/api_json.html'
+RECORD_ID_FILEPATH = "/tmp/ddclient.recid_{}_{}".format(
+    CF_DOMAIN, CF_SUB_DOMAIN
+)
 
 
 def get_ip():
@@ -73,8 +76,7 @@ def get_ip():
 
 def get_record_id():
     try:
-        filepath = "/tmp/ddclient.recid_{}_{}".format(CF_DOMAIN, CF_SUB_DOMAIN)
-        with open(filepath, 'r') as f:
+        with open(RECORD_ID_FILEPATH, 'r') as f:
             rec_id = f.read()
             return rec_id.strip()
     except:
@@ -105,9 +107,7 @@ def get_record_id():
 
     if flag_found_name:
         try:
-            filepath = "/tmp/ddclient.recid_{}_{}".format(
-                CF_DOMAIN, CF_SUB_DOMAIN)
-            with open(filepath, 'w') as f:
+            with open(RECORD_ID_FILEPATH, 'w') as f:
                 f.write(rec_id)
             return rec_id
         except:
@@ -122,8 +122,7 @@ def get_record_id():
 def update_record():
     flag_found_name = False
     try:
-        filepath = "/tmp/ddclient.recid_{}_{}".format(CF_DOMAIN, CF_SUB_DOMAIN)
-        with open(filepath, 'r') as f:
+        with open(RECORD_ID_FILEPATH, 'r') as f:
             rec_id = f.read()
             flag_found_name = True
     except:
@@ -197,6 +196,7 @@ def run():
         while(1):
             update_record()
             time.sleep(15)
+
 
 if __name__ == "__main__":
         get_record_id()
